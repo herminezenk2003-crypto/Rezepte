@@ -667,7 +667,7 @@ const A = {
     if (!(await ask('Alle Gerichte dieser Woche entfernen?', 'Leeren'))) return;
     weekDays(ui.weekOff).forEach((d) => delete db.plan[dayKey(d)]); save(); render();
   },
-  autoFill: () => { ui.fill = ui.fill || { meals: ['mittag', 'abend'], mine: false, servings: db.profile.servings }; A.renderFill(); },
+  autoFill: () => { ui.fill = ui.fill || { meals: ['fruehstueck', 'mittag', 'abend'], mine: false, servings: db.profile.servings }; A.renderFill(); },
   renderFill: () => {
     const p = ui.fill;
     modal(`<h2>Woche automatisch füllen</h2><p class="small muted">Leere Plätze werden mit passenden Rezepten gefüllt. Schon Geplantes bleibt.</p>
