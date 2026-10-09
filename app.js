@@ -109,15 +109,15 @@ function ingKey(name) {
 const SECTIONS = ['Obst & Gemüse', 'Kühlregal', 'Fisch & Fleisch', 'Brot & Backwaren', 'Nudeln, Reis & Getreide', 'Hülsenfrüchte & Konserven', 'Nüsse & Samen', 'Tiefkühl', 'Gewürze, Öl & Vorrat', 'Sonstiges'];
 const SEC_RULES = [
   ['Tiefkühl', /\(tk\)|\btk\b|tiefkühl/],
-  ['Hülsenfrüchte & Konserven', /dose|thunfisch|kokosmilch|passiert|tomatenmark|\bmais\b/],
+  ['Hülsenfrüchte & Konserven', /dose|thunfisch|kokosmilch|passiert|tomatenmark|\bmais\b|olive(?!nöl)/],
   ['Fisch & Fleisch', /lachs|hähnchen|huhn|pute|garnele|fisch|rind|hack|schinken|forelle/],
   ['Kühlregal', /joghurt|skyr|quark|milch|käse|feta|ricotta|mozzarella|halloumi|parmesan|tofu|tempeh|^eier?\b|butter|sahne|hummus|kefir|miso/],
   ['Gewürze, Öl & Vorrat', /salz|pfeffer|öl$|öl |essig|balsamico|sojasauce|honig|sirup|senf|curry|pulver|kreuzkümmel|zimt|kurkuma|brühe|oregano|thymian|rosmarin|chili|muskat|masala|hefeflocken|stärke|vanille|backpulver/],
   ['Nüsse & Samen', /nuss|nüsse|mandel|cashew|kerne|samen|sesam|chia|lein|hanf|mus$|tahin|dattel|rosine/],
   ['Nudeln, Reis & Getreide', /nudel|pasta|spaghetti|reis|quinoa|bulgur|couscous|hafer|buchweizen|hirse|mehl|soba|polenta/],
-  ['Brot & Backwaren', /brot|tortilla|wrap|brötchen|knäcke/],
+  ['Brot & Backwaren', /brot|tortilla|wrap|brötchen|knäcke|schokolade/],
   ['Hülsenfrüchte & Konserven', /linse|bohne|kichererbse|erbse/],
-  ['Obst & Gemüse', /zwiebel|knoblauch|paprika|zucchini|spinat|brokkoli|möhre|karotte|apfel|äpfel|banane|beere|zitrone|limette|ingwer|avocado|gurke|salat|kartoffel|kürbis|pilz|champignon|lauch|petersilie|koriander|basilikum|minze|dill|schnittlauch|kohl|aubergine|sellerie|bete|fenchel|mango|birne|orange|rucola|granatapfel|tomate|radieschen|spargel|kräuter|wirsing|pastinake|obst|gemüse|traube|kiwi|pflaume|feige|edamame/],
+  ['Obst & Gemüse', /zwiebel|knoblauch|paprika|zucchini|spinat|brokkoli|möhre|karotte|apfel|äpfel|banane|beere|zitrone|limette|ingwer|avocado|gurke|salat|kartoffel|kürbis|pilz|champignon|lauch|petersilie|koriander|basilikum|minze|dill|schnittlauch|kohl|aubergine|sellerie|bete|fenchel|mango|birne|orange|rucola|granatapfel|tomate|radieschen|spargel|kräuter|wirsing|pastinake|obst|gemüse|traube|kiwi|pflaume|feige|edamame|zuckerschote/],
 ];
 const secOf = (i) => { const t = `${i.name} ${i.note}`.toLowerCase(); return (SEC_RULES.find(([, re]) => re.test(t)) || ['Sonstiges'])[0]; };
 
