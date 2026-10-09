@@ -263,3 +263,8 @@ input:focus, select:focus, textarea:focus { outline: 0; background: var(--card);
 .sheet::before { content: ''; position: absolute; top: 8px; left: 50%; width: 38px; height: 5px; margin-left: -19px; border-radius: 3px; background: var(--line); }
 .close { top: 18px; }
 .card.day.past { opacity: .6; box-shadow: none; }
+details.card.stock summary { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+details.card.stock summary::after { content: '›'; float: none; font-size: 20px; }
+.sum-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+details.card.stock .link { margin: 4px 0 6px; }
+body.noscroll #toast { bottom: auto; top: calc(env(safe-area-inset-top) + 12px); }

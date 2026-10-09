@@ -124,10 +124,10 @@ const secOf = (i) => { const t = `${i.name} ${i.note}`.toLowerCase(); return (SE
 // ---------- Speicher ----------
 const KEY = 'rezepte.v1';
 const EMPTY = () => ({ v: 1, profile: { servings: 2, avoid: 'Tomaten (nur wenig), rohe Möhren' }, recipes: [], meta: {}, plan: {},
-  shop: { checked: {}, home: {}, extra: [], recipes: [] }, lastBackup: null });
+  shop: { checked: {}, home: {}, buy: {}, extra: [], recipes: [] }, pantry: ['Salz', 'Pfeffer', 'Meersalz', 'Olivenöl'], lastBackup: null });
 let db = load();
 function load() {
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v === 1) return Object.assign(EMPTY(), d); } catch (e) {}
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v === 1) { const x = Object.assign(EMPTY(), d); x.shop.buy = x.shop.buy || {}; return x; } } catch (e) {}
   return EMPTY();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast('Speichern fehlgeschlagen'); } }
@@ -194,6 +194,16 @@ function shoppingItems() {
   return [...map.values()];
 }
 const itemAmount = (it) => Object.entries(it.amounts).map(([u, q]) => amount(q, u)).filter(Boolean).join(' + ');
+// Vorrat: Dinge, die immer da sind, kommen nicht auf die Liste (außer „Diesmal doch kaufen“)
+const inPantry = (key) => db.pantry.some((n) => ingKey(n) === key);
+const fromPantry = (it) => inPantry(it.key) && !db.shop.buy?.[it.key];
+function pantrySuggestions() {
+  const extra = ['Haferflocken', 'Vollkornreis', 'Quinoa', 'Leinsamen', 'Chiasamen', 'Sesam', 'Mehl', 'Speisestärke'];
+  const names = new Map();
+  BUILTIN.forEach((r) => r.ingredients.forEach((i) => { if (secOf(i) === 'Gewürze, Öl & Vorrat' && !names.has(ingKey(i.name))) names.set(ingKey(i.name), i.name); }));
+  extra.forEach((n) => { if (!names.has(ingKey(n))) names.set(ingKey(n), n); });
+  return [...names.values()].filter((n) => !inPantry(ingKey(n))).sort((a, b) => a.localeCompare(b, 'de'));
+}
 const itemText = (it) => { const a = itemAmount(it); return `${a ? a + ' ' : ''}${it.name}${it.note ? ' ' + it.note : ''}`; };
 
 // ---------- Anfragen für Claude ----------
@@ -485,7 +495,7 @@ function addEntry(day, rid, meal, servings) {
 
 // ---------- Ansicht: Einkauf ----------
 function viewShop() {
-  const items = shoppingItems();
+  const all = shoppingItems(), stock = all.filter(fromPantry), items = all.filter((i) => !fromPantry(i));
   const home = items.filter((i) => db.shop.home[i.key]), rest = items.filter((i) => !db.shop.home[i.key]);
   const row = (it) => `<div class="row shop ${db.shop.checked[it.key] ? 'done' : ''}"><button type="button" class="ex-row sitem" data-a="checkItem" data-k="${esc(it.key)}"><span class="box">${db.shop.checked[it.key] ? '✓' : ''}</span><span class="stext"><b>${esc(itemText(it))}</b><span class="from">${esc([...it.from].join(', '))}</span></span></button><button type="button" class="btn small" data-a="homeItem" data-k="${esc(it.key)}">Hab ich</button></div>`;
   const groups = SECTIONS.map((s) => { const l = rest.filter((i) => i.sec === s); return l.length ? `<div class="card list">${cardHead(SEC_ICO[s][0], `sm ${SEC_ICO[s][1]}`, s, `${l.filter((i) => !db.shop.checked[i.key]).length} offen`)}${l.map(row).join('')}</div>` : ''; }).join('');
@@ -494,13 +504,17 @@ function viewShop() {
   const open = rest.filter((i) => !db.shop.checked[i.key]).length + db.shop.extra.filter((x) => !x.done).length;
   const total = rest.length + db.shop.extra.length, done = total - open;
   const progress = total ? `<div class="card progress-card"><div class="row"><div><b class="big">${done} von ${total}</b><span class="small muted"> erledigt</span></div>${ico('cart', 'sm')}</div>
-    <div class="bar"><i style="width:${Math.round((done / total) * 100)}%"></i></div><p class="small muted">Aus dem Wochenplan${db.shop.recipes.length ? ' und einzelnen Rezepten' : ''}${home.length ? ` · ${home.length} schon zu Hause` : ''}</p></div>` : '';
+    <div class="bar"><i style="width:${Math.round((done / total) * 100)}%"></i></div><p class="small muted">Aus dem Wochenplan${db.shop.recipes.length ? ' und einzelnen Rezepten' : ''}${home.length ? ` · ${home.length} schon zu Hause` : ''}${stock.length ? ` · ${stock.length} aus dem Vorrat` : ''}</p></div>` : '';
+  const stockCard = stock.length ? `<details class="card list stock"><summary>${ico('salt', 'sm')}<span class="sum-t"><b>Aus dem Vorrat</b><span class="small muted">${stock.length} ${stock.length === 1 ? 'Zutat' : 'Zutaten'} hast du immer da</span></span></summary>
+    ${stock.map((it) => `<div class="row shop"><span class="stext"><b>${esc(itemText(it))}</b></span><button type="button" class="btn small" data-a="buyOnce" data-k="${esc(it.key)}">Diesmal kaufen</button></div>`).join('')}
+    <button type="button" class="link" data-a="tab" data-tab="mehr">Vorrat bearbeiten</button></details>` : '';
   return `${header('Einkaufsliste')}${weekNav()}
     ${items.length || db.shop.extra.length ? progress : `<p class="empty">Noch nichts auf der Liste.<br>Plane Gerichte im Wochenplan oder tippe bei einem Rezept auf „Auf Einkaufsliste“.</p>`}
     ${groups}
     <div class="card">${cardHead('pen', 'sm plum', 'Eigene Einträge')}${extra ? `<div class="list">${extra}</div>` : ''}
       <div class="addrow"><input id="extraIn" placeholder="z. B. Spülmittel" enterkeyhint="done" data-k="extra"><button type="button" class="btn small primary" data-a="addExtra">Hinzufügen</button></div></div>
     ${home.length ? `<div class="card list">${cardHead('bag', 'sm', 'Schon zu Hause')}${home.map((it) => `<div class="row shop done"><span><b>${esc(itemText(it))}</b></span><button type="button" class="btn small" data-a="homeItem" data-k="${esc(it.key)}">Doch kaufen</button></div>`).join('')}</div>` : ''}
+    ${stockCard}
     ${singles ? `<div class="card list">${cardHead('bowl', 'sm orange', 'Zusätzliche Rezepte')}${singles}</div>` : ''}
     ${items.length || db.shop.extra.length ? `<div class="btnrow"><button type="button" class="btn" data-a="shareShop">Liste teilen</button><button type="button" class="btn" data-a="resetShop">Neu beginnen</button></div>` : ''}`;
 }
@@ -545,6 +559,11 @@ function viewMore() {
     <div class="card">${cardHead('user', '', 'Mein Profil')}
       <div class="row"><span>Standard-Portionen</span><div class="stepper"><button type="button" class="icon sm" data-a="profServ" data-d="-1">−</button><b>${db.profile.servings}</b><button type="button" class="icon sm" data-a="profServ" data-d="1">+</button></div></div>
       <label class="field"><span>Mag ich nicht / vertrage ich nicht (für Claudes Ideen)</span><textarea rows="2" data-c="avoid">${esc(db.profile.avoid)}</textarea></label></div>
+    <div class="card">${cardHead('salt', 'gold', 'Mein Vorrat', 'Kommt nie auf die Einkaufsliste')}
+      <div class="chips">${db.pantry.length ? db.pantry.slice().sort((a, b) => a.localeCompare(b, 'de')).map((n) => `<button type="button" class="chip-btn on" data-a="pantryToggle" data-n="${esc(n)}">${esc(n)} ✕</button>`).join('') : '<span class="small muted">Noch leer</span>'}</div>
+      <div class="addrow"><input id="pantryIn" placeholder="z. B. Sojasauce" enterkeyhint="done"><button type="button" class="btn small primary" data-a="pantryAdd">Hinzufügen</button></div>
+      <button type="button" class="link" data-a="pantryMore">${ui.pantryMore ? 'Vorschläge ausblenden' : 'Vorschläge anzeigen'}</button>
+      ${ui.pantryMore ? `<div class="chips">${pantrySuggestions().map((n) => `<button type="button" class="chip-btn" data-a="pantryToggle" data-n="${esc(n)}">+ ${esc(n)}</button>`).join('')}</div>` : ''}</div>
     <div class="card">${cardHead('save', 'blue', 'Daten sichern')}
       <p class="small muted">Alles ist nur auf diesem iPhone gespeichert (${own} eigene ${own === 1 ? 'Rezept' : 'Rezepte'}). Sichere ab und zu eine Datei, z. B. in iCloud Drive.${db.lastBackup ? ` Letzte Sicherung: ${new Date(db.lastBackup).toLocaleDateString('de-DE')}.` : ''}</p>
       <button type="button" class="btn" data-a="exportJson">Daten sichern</button>
@@ -703,13 +722,26 @@ const A = {
   },
   // Einkauf
   checkItem: (d) => { db.shop.checked[d.k] = !db.shop.checked[d.k]; save(); render(); },
-  homeItem: (d) => { if (db.shop.home[d.k]) delete db.shop.home[d.k]; else db.shop.home[d.k] = true; save(); render(); },
+  homeItem: (d) => {
+    if (db.shop.home[d.k]) { delete db.shop.home[d.k]; save(); render(); return; }
+    const it = shoppingItems().find((i) => i.key === d.k); if (!it) return;
+    modal(`<h2>${esc(it.name)}</h2><p class="small muted">Hast du das gerade da oder immer?</p>
+      <button type="button" class="btn" data-a="homeOnce" data-k="${esc(d.k)}">Nur diesmal da</button>
+      <button type="button" class="btn primary" data-a="toPantry" data-n="${esc(it.name)}">Immer im Vorrat</button>
+      <p class="small muted">Vorrat kommt nie auf die Einkaufsliste. Du kannst ihn unter „Mehr“ ändern.</p>`);
+  },
+  homeOnce: (d) => { db.shop.home[d.k] = true; save(); closeModal(); render(); },
+  toPantry: (d) => { if (!inPantry(ingKey(d.n))) db.pantry.push(d.n); delete db.shop.buy[ingKey(d.n)]; save(); closeModal(); render(); toast(`${d.n} ist jetzt im Vorrat`); },
+  buyOnce: (d) => { db.shop.buy[d.k] = true; save(); render(); },
+  pantryToggle: (d) => { const k = ingKey(d.n); if (inPantry(k)) db.pantry = db.pantry.filter((n) => ingKey(n) !== k); else db.pantry.push(d.n); save(); render(); },
+  pantryAdd: () => { const el = $('#pantryIn'); const t = el?.value.trim(); if (!t) return; if (!inPantry(ingKey(t))) db.pantry.push(t); save(); render(); $('#pantryIn')?.focus(); },
+  pantryMore: () => { ui.pantryMore = !ui.pantryMore; render(); },
   addExtra: () => { const el = $('#extraIn'); const t = el.value.trim(); if (!t) return; db.shop.extra.push({ id: uid(), text: t, done: false }); save(); render(); $('#extraIn')?.focus(); },
   checkExtra: (d) => { const x = db.shop.extra.find((e) => e.id === d.id); x.done = !x.done; save(); render(); },
   delExtra: (d) => { db.shop.extra = db.shop.extra.filter((e) => e.id !== d.id); save(); render(); },
   delShopRecipe: (d) => { db.shop.recipes.splice(+d.i, 1); save(); render(); },
   shareShop: async () => {
-    const items = shoppingItems().filter((i) => !db.shop.home[i.key] && !db.shop.checked[i.key]);
+    const items = shoppingItems().filter((i) => !fromPantry(i) && !db.shop.home[i.key] && !db.shop.checked[i.key]);
     const lines = SECTIONS.flatMap((s) => { const l = items.filter((i) => i.sec === s); return l.length ? [`${s}:`, ...l.map((i) => `- ${itemText(i)}`), ''] : []; });
     const ex = db.shop.extra.filter((x) => !x.done).map((x) => `- ${x.text}`);
     const text = ['Einkaufsliste', '', ...lines, ...(ex.length ? ['Sonstiges:', ...ex] : [])].join('\n').trim();
@@ -718,7 +750,7 @@ const A = {
   },
   resetShop: async () => {
     if (!(await ask('Neue Einkaufsliste beginnen? Haken, „Hab ich“-Markierungen, eigene Einträge und zusätzliche Rezepte werden entfernt. Der Wochenplan bleibt.', 'Neu beginnen'))) return;
-    db.shop = { checked: {}, home: {}, extra: [], recipes: [] }; save(); render();
+    db.shop = { checked: {}, home: {}, buy: {}, extra: [], recipes: [] }; save(); render();
   },
   // Neu & Import
   ideaMeal: (d) => { ui.idea.meal = d.m; render(); },
@@ -784,6 +816,7 @@ document.addEventListener('change', (e) => { if (e.target.type === 'checkbox' ||
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
   if (e.key === 'Enter' && e.target.id === 'extraIn') { e.preventDefault(); A.addExtra(); }
+  if (e.key === 'Enter' && e.target.id === 'pantryIn') { e.preventDefault(); A.pantryAdd(); }
 });
 
 window.addEventListener('scroll', () => document.body.classList.toggle('scrolled', window.scrollY > 8), { passive: true });
