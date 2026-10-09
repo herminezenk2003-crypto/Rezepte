@@ -12,6 +12,42 @@ const num = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); re
 const MEALS = { fruehstueck: 'Frühstück', mittag: 'Mittag', abend: 'Abend', snack: 'Snack', mealprep: 'Meal Prep' };
 const SLOTS = ['fruehstueck', 'mittag', 'abend', 'snack'];
 
+// ---------- Symbole ----------
+const ICONS = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M2.5 12h2M19.5 12h2M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+  bowl: '<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7.5c0-1.5 1-2 1-3.5M12 7.5c0-1.5 1-2 1-3.5M16 7.5c0-1.5 1-2 1-3.5"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  apple: '<path d="M12 7.5c-2-1.5-6.5-1-7 3.5S8 20.5 10 20.5c1 0 1.3-.5 2-.5s1 .5 2 .5c2 0 5.5-5 5-9.5s-5-5-7-3.5z"/><path d="M12 7.5c0-2 1-3.5 3-4.5"/>',
+  box: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M3 12h18M9 4h6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  dumbbell: '<path d="M6.5 8v8M3.5 10v4M17.5 8v8M20.5 10v4M6.5 12h11"/>',
+  leaf: '<path d="M5 19c0-8 5-13.5 14.5-14.5C19.5 14 14 19 5 19z"/><path d="M5 19l8.5-8.5"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  bulb: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+  paste: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 3h6v3H9zM9 11h6M9 15h4"/>',
+  pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  save: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  cart: '<path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6.2"/><circle cx="10" cy="20.5" r="1.2"/><circle cx="17" cy="20.5" r="1.2"/>',
+  milk: '<path d="M8 3h8v3l2 3v12H6V9l2-3z"/><path d="M6 13h12"/>',
+  fish: '<path d="M3 12c3-5 10-6 15 0-5 6-12 5-15 0z"/><path d="M18 12l3-3v6z"/><circle cx="8" cy="11" r=".6"/>',
+  bread: '<path d="M5 10.5A3.5 3.5 0 0 1 7.5 4h9A3.5 3.5 0 0 1 19 10.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/>',
+  wheat: '<path d="M12 21V8M12 8c-2.5 0-3.5-2.5-3.5-4.5 2 0 3.5 1 3.5 4.5zM12 8c2.5 0 3.5-2.5 3.5-4.5-2 0-3.5 1-3.5 4.5zM12 13c-2.5 0-3.5-2.5-3.5-4.5 2 0 3.5 1 3.5 4.5zM12 13c2.5 0 3.5-2.5 3.5-4.5-2 0-3.5 1-3.5 4.5z"/>',
+  can: '<ellipse cx="12" cy="5.5" rx="6" ry="2"/><path d="M6 5.5v13c0 1.1 2.7 2 6 2s6-.9 6-2v-13M6 10h12"/>',
+  nut: '<path d="M12 3c4 0 7 3 7 8s-3 10-7 10-7-5-7-10 3-8 7-8z"/><path d="M12 8v9"/>',
+  snow: '<path d="M12 2.5v19M3.8 7.2l16.4 9.6M20.2 7.2 3.8 16.8M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
+  salt: '<path d="M9 3h6l1 5v12a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8z"/><path d="M8 8h8M11 5.5h.01M13 5.5h.01"/>',
+  bag: '<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+};
+const ico = (name, cls = '') => `<span class="ico ${cls}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg></span>`;
+const MEAL_ICO = { fruehstueck: ['sun', 'gold'], mittag: ['bowl', ''], abend: ['moon', 'blue'], snack: ['apple', 'orange'], mealprep: ['box', 'plum'] };
+const mealIco = (m, extra = '') => { const [n, c] = MEAL_ICO[m] || MEAL_ICO.mittag; return ico(n, `${c} ${extra}`); };
+const SEC_ICO = { 'Obst & Gemüse': ['leaf', ''], 'Kühlregal': ['milk', 'blue'], 'Fisch & Fleisch': ['fish', 'orange'], 'Brot & Backwaren': ['bread', 'gold'],
+  'Nudeln, Reis & Getreide': ['wheat', 'gold'], 'Hülsenfrüchte & Konserven': ['can', 'plum'], 'Nüsse & Samen': ['nut', 'orange'], 'Tiefkühl': ['snow', 'blue'], 'Gewürze, Öl & Vorrat': ['salt', ''], 'Sonstiges': ['bag', 'plum'] };
+const cardHead = (icon, cls, title, sub = '', right = '') => `<div class="card-head">${ico(icon, cls)}<h2>${title}${sub ? `<small>${sub}</small>` : ''}</h2>${right}</div>`;
+
 // ---------- Mengen und Zutaten ----------
 const FRAC = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3, '⅛': 0.125 };
 const UNITS = { g: 'g', gr: 'g', gramm: 'g', kg: 'kg', ml: 'ml', l: 'l', liter: 'l', el: 'EL', tl: 'TL', msp: 'Msp', prise: 'Prise', prisen: 'Prise',
@@ -121,7 +157,7 @@ const nutri = (r) => [r.protein != null ? `${r.protein} g Protein` : '', r.fiber
 function recipeRow(r, action = 'openRecipe', extra = '') {
   const m = metaOf(r.id);
   const tag = SOURCE_TAG[r.source] ? `<span class="tag">${SOURCE_TAG[r.source]}</span> ` : '';
-  return `<button type="button" class="rrow" data-a="${action}" data-id="${r.id}" ${extra}>
+  return `<button type="button" class="rrow" data-a="${action}" data-id="${r.id}" ${extra}>${mealIco(r.meals[0], 'sm')}
     <span class="rmain"><b>${esc(r.name)}</b><span class="meta">${tag}${r.time ? `${r.time} Min` : ''}${nutri(r) ? ' · ' + nutri(r) : ''}</span></span>
     <span class="rside">${m.fav ? '<span class="star on">★</span>' : ''}${m.rating ? `<span class="small muted">${m.rating}/5</span>` : ''}<span class="chev">›</span></span></button>`;
 }
@@ -267,11 +303,25 @@ function render() {
 const header = (title, back, right = '', cls = '') => `<header class="top ${cls}">${back ? `<button type="button" class="back" data-a="${back}" aria-label="Zurück">‹</button>` : ''}<h1>${esc(title)}</h1>${right}</header>`;
 
 // ---------- Ansicht: Rezepte ----------
+function heroCard() {
+  const now = new Date(), k = dayKey(now), h = now.getHours();
+  const greet = h < 11 ? 'Guten Morgen' : h < 17 ? 'Hallo' : 'Guten Abend';
+  const today = (db.plan[k] || []).slice().sort((a, b) => SLOTS.indexOf(a.meal) - SLOTS.indexOf(b.meal));
+  const planned = weekEntries(0).length;
+  const week = weekDays(0).map((d) => { const n = (db.plan[dayKey(d)] || []).length;
+    return `<div class="hd ${dayKey(d) === k ? 'today' : ''}"><span>${['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()]}</span><i class="${n ? 'on' : ''}">${n || ''}</i></div>`; }).join('');
+  const body = today.length
+    ? `<p>Heute auf dem Plan:</p><div class="hero-meals">${today.map((e) => { const r = byId(e.rid); return r ? `<button type="button" class="hero-meal" data-a="openEntry" data-day="${k}" data-e="${e.id}"><span>${MEALS[e.meal]}</span><b>${esc(r.name)}</b></button>` : ''; }).join('')}</div>`
+    : `<p>Für heute ist noch nichts geplant.</p><button type="button" class="hero-btn" data-a="tab" data-tab="woche">Woche planen</button>`;
+  return `<div class="hero"><div class="hero-date">${WD_LONG[now.getDay()]}, ${now.getDate()}. ${MON[now.getMonth()]}${planned ? ` · ${planned} ${planned === 1 ? 'Gericht' : 'Gerichte'} diese Woche` : ''}</div>
+    <h2>${greet}!</h2>${body}<div class="hero-week">${week}</div></div>`;
+}
 function viewRecipes() {
   const f = ui.f;
   const chip = (on, a, label, data = '') => `<button type="button" class="chip-btn ${on ? 'on' : ''}" data-a="${a}" ${data}>${label}</button>`;
   return `${header('Rezepte', null, '<button type="button" class="icon" data-a="newRecipe" aria-label="Neues Rezept">+</button>')}
-    <div class="search"><input type="search" placeholder="Suchen: Name oder Zutat" value="${esc(ui.q)}" data-c="search"></div>
+    ${heroCard()}
+    <div class="search"><input type="search" placeholder="Rezept oder Zutat suchen" value="${esc(ui.q)}" data-c="search"></div>
     <div class="chips scroll">${chip(!f.meal, 'fMeal', 'Alle', 'data-m=""')}${Object.entries(MEALS).map(([k, l]) => chip(f.meal === k, 'fMeal', l, `data-m="${k}"`)).join('')}</div>
     <div class="chips scroll">${chip(f.time === 20, 'fTime', '≤ 20 Min', 'data-t="20"')}${chip(f.time === 40, 'fTime', '≤ 40 Min', 'data-t="40"')}${chip(f.veg, 'fToggle', 'Vegetarisch', 'data-k="veg"')}${chip(f.fav, 'fToggle', '★ Favoriten', 'data-k="fav"')}${chip(f.mine, 'fToggle', 'Meine', 'data-k="mine"')}</div>
     <div id="rlist">${recipeList()}</div>`;
@@ -290,9 +340,13 @@ function viewRecipe() {
   return `${header(r.name, 'closeView', `<button type="button" class="icon fav ${m.fav ? 'on' : ''}" data-a="fav" aria-label="Favorit">${m.fav ? '♥' : '♡'}</button>`, 'wrap')}
     <div class="card">
       <div class="chips">${r.meals.map((x) => `<span class="tag">${MEALS[x] || x}</span>`).join('')}${r.veg ? '<span class="tag">vegetarisch</span>' : ''}${SOURCE_TAG[r.source] ? `<span class="tag">${SOURCE_TAG[r.source]}</span>` : ''}</div>
-      ${r.time ? `<p>⏱ ${r.time} Minuten</p>` : ''}
-      ${nutri(r) ? `<p class="small muted">pro Portion ca. ${nutri(r)}</p>` : ''}
-      <div class="row"><span class="small muted">Bewertung</span><span class="stars">${stars}</span></div>
+      <div class="tiles">
+        <div class="tile">${ico('clock', 'sm')}<b>${r.time ?? '–'}</b><span>Minuten</span></div>
+        <div class="tile">${ico('dumbbell', 'sm orange')}<b>${r.protein ?? '–'}${r.protein != null ? '<small> g</small>' : ''}</b><span>Protein</span></div>
+        <div class="tile">${ico('leaf', 'sm gold')}<b>${r.fiber ?? '–'}${r.fiber != null ? '<small> g</small>' : ''}</b><span>Ballaststoffe</span></div>
+      </div>
+      ${nutri(r) ? '<p class="small muted center">Nährwerte pro Portion, grob geschätzt</p>' : ''}
+      <div class="row rate"><span class="small muted">Deine Bewertung</span><span class="stars">${stars}</span></div>
     </div>
     <div class="card">
       <div class="row"><h2>Zutaten</h2><div class="stepper"><button type="button" class="icon sm" data-a="servings" data-d="-1" aria-label="Weniger">−</button><b>${s} ${s === 1 ? 'Portion' : 'Portionen'}</b><button type="button" class="icon sm" data-a="servings" data-d="1" aria-label="Mehr">+</button></div></div>
@@ -395,8 +449,8 @@ function viewWeek() {
   const days = weekDays(ui.weekOff).map((d) => {
     const k = dayKey(d);
     const list = (db.plan[k] || []).slice().sort((a, b) => SLOTS.indexOf(a.meal) - SLOTS.indexOf(b.meal));
-    return `<div class="card day ${k === today ? 'hl' : ''}"><div class="row"><h3>${WD_LONG[d.getDay()]}, ${d.getDate()}. ${MON[d.getMonth()]}</h3><button type="button" class="icon sm" data-a="addToDay" data-day="${k}" aria-label="Gericht hinzufügen">+</button></div>
-      ${list.length ? `<div class="list">${list.map((e) => { const r = byId(e.rid); return `<div class="row entry"><button type="button" class="ex-row" data-a="openEntry" data-day="${k}" data-e="${e.id}"><span class="small muted">${MEALS[e.meal]}</span><br><b>${esc(r ? r.name : 'Gelöschtes Rezept')}</b> <span class="small muted">· ${e.servings} P.</span></button><button type="button" class="icon sm" data-a="delEntry" data-day="${k}" data-e="${e.id}" aria-label="Entfernen">✕</button></div>`; }).join('')}</div>` : '<p class="small muted">Noch nichts geplant</p>'}</div>`;
+    return `<div class="card day ${k === today ? 'hl' : k < today ? 'past' : ''}"><div class="row"><h3>${WD_LONG[d.getDay()]}, ${d.getDate()}. ${MON[d.getMonth()]}</h3><button type="button" class="icon sm" data-a="addToDay" data-day="${k}" aria-label="Gericht hinzufügen">+</button></div>
+      ${list.length ? `<div class="list">${list.map((e) => { const r = byId(e.rid); return `<div class="row entry">${mealIco(e.meal, 'sm')}<button type="button" class="ex-row" data-a="openEntry" data-day="${k}" data-e="${e.id}"><span class="small muted">${MEALS[e.meal]}</span><br><b>${esc(r ? r.name : 'Gelöschtes Rezept')}</b> <span class="small muted">· ${e.servings} P.</span></button><button type="button" class="icon sm" data-a="delEntry" data-day="${k}" data-e="${e.id}" aria-label="Entfernen">✕</button></div>`; }).join('')}</div>` : '<p class="small muted">Noch nichts geplant</p>'}</div>`;
   }).join('');
   const n = weekEntries(ui.weekOff).length;
   return `${header('Wochenplan')}${weekNav()}
@@ -434,17 +488,20 @@ function viewShop() {
   const items = shoppingItems();
   const home = items.filter((i) => db.shop.home[i.key]), rest = items.filter((i) => !db.shop.home[i.key]);
   const row = (it) => `<div class="row shop ${db.shop.checked[it.key] ? 'done' : ''}"><button type="button" class="ex-row sitem" data-a="checkItem" data-k="${esc(it.key)}"><span class="box">${db.shop.checked[it.key] ? '✓' : ''}</span><span class="stext"><b>${esc(itemText(it))}</b><span class="from">${esc([...it.from].join(', '))}</span></span></button><button type="button" class="btn small" data-a="homeItem" data-k="${esc(it.key)}">Hab ich</button></div>`;
-  const groups = SECTIONS.map((s) => { const l = rest.filter((i) => i.sec === s); return l.length ? `<div class="card list"><h3 class="sec">${s}</h3>${l.map(row).join('')}</div>` : ''; }).join('');
+  const groups = SECTIONS.map((s) => { const l = rest.filter((i) => i.sec === s); return l.length ? `<div class="card list">${cardHead(SEC_ICO[s][0], `sm ${SEC_ICO[s][1]}`, s, `${l.filter((i) => !db.shop.checked[i.key]).length} offen`)}${l.map(row).join('')}</div>` : ''; }).join('');
   const extra = db.shop.extra.map((x) => `<div class="row shop ${x.done ? 'done' : ''}"><button type="button" class="ex-row sitem" data-a="checkExtra" data-id="${x.id}"><span class="box">${x.done ? '✓' : ''}</span><b>${esc(x.text)}</b></button><button type="button" class="icon sm" data-a="delExtra" data-id="${x.id}" aria-label="Entfernen">✕</button></div>`).join('');
   const singles = db.shop.recipes.map((s, i) => { const r = byId(s.rid); return r ? `<div class="row"><span>${esc(r.name)} <span class="small muted">· ${s.servings} P.</span></span><button type="button" class="icon sm" data-a="delShopRecipe" data-i="${i}" aria-label="Entfernen">✕</button></div>` : ''; }).join('');
   const open = rest.filter((i) => !db.shop.checked[i.key]).length + db.shop.extra.filter((x) => !x.done).length;
+  const total = rest.length + db.shop.extra.length, done = total - open;
+  const progress = total ? `<div class="card progress-card"><div class="row"><div><b class="big">${done} von ${total}</b><span class="small muted"> erledigt</span></div>${ico('cart', 'sm')}</div>
+    <div class="bar"><i style="width:${Math.round((done / total) * 100)}%"></i></div><p class="small muted">Aus dem Wochenplan${db.shop.recipes.length ? ' und einzelnen Rezepten' : ''}${home.length ? ` · ${home.length} schon zu Hause` : ''}</p></div>` : '';
   return `${header('Einkaufsliste')}${weekNav()}
-    ${items.length || db.shop.extra.length ? `<p class="small muted">${open} offen · aus dem Wochenplan${db.shop.recipes.length ? ' und einzelnen Rezepten' : ''}</p>` : `<p class="empty">Noch nichts auf der Liste.<br>Plane Gerichte im Wochenplan oder tippe bei einem Rezept auf „Auf Einkaufsliste“.</p>`}
+    ${items.length || db.shop.extra.length ? progress : `<p class="empty">Noch nichts auf der Liste.<br>Plane Gerichte im Wochenplan oder tippe bei einem Rezept auf „Auf Einkaufsliste“.</p>`}
     ${groups}
-    <div class="card"><h3 class="sec">Eigene Einträge</h3>${extra ? `<div class="list">${extra}</div>` : ''}
+    <div class="card">${cardHead('pen', 'sm plum', 'Eigene Einträge')}${extra ? `<div class="list">${extra}</div>` : ''}
       <div class="addrow"><input id="extraIn" placeholder="z. B. Spülmittel" enterkeyhint="done" data-k="extra"><button type="button" class="btn small primary" data-a="addExtra">Hinzufügen</button></div></div>
-    ${home.length ? `<div class="card list"><h3 class="sec">Schon zu Hause</h3>${home.map((it) => `<div class="row shop done"><span><b>${esc(itemText(it))}</b></span><button type="button" class="btn small" data-a="homeItem" data-k="${esc(it.key)}">Doch kaufen</button></div>`).join('')}</div>` : ''}
-    ${singles ? `<div class="card list"><h3 class="sec">Zusätzliche Rezepte</h3>${singles}</div>` : ''}
+    ${home.length ? `<div class="card list">${cardHead('bag', 'sm', 'Schon zu Hause')}${home.map((it) => `<div class="row shop done"><span><b>${esc(itemText(it))}</b></span><button type="button" class="btn small" data-a="homeItem" data-k="${esc(it.key)}">Doch kaufen</button></div>`).join('')}</div>` : ''}
+    ${singles ? `<div class="card list">${cardHead('bowl', 'sm orange', 'Zusätzliche Rezepte')}${singles}</div>` : ''}
     ${items.length || db.shop.extra.length ? `<div class="btnrow"><button type="button" class="btn" data-a="shareShop">Liste teilen</button><button type="button" class="btn" data-a="resetShop">Neu beginnen</button></div>` : ''}`;
 }
 
@@ -453,17 +510,19 @@ function viewNew() {
   const i = ui.idea;
   const c = (a, on, label, data) => `<button type="button" class="chip-btn ${on ? 'on' : ''}" data-a="${a}" ${data}>${label}</button>`;
   return `${header('Neues Rezept')}
-    <div class="card"><h2>📷 Rezept aus einem Foto</h2>
+    <div class="card">${cardHead('camera', 'gold', 'Rezept aus einem Foto', 'Mengen werden automatisch erkannt')}
       <ol class="how"><li>Tippe auf „Anfrage kopieren“.</li><li>Öffne die Claude-App, füge die Anfrage ins Textfeld ein und hänge das Foto an (über das + oder die Büroklammer).</li><li>Kopiere Claudes Antwort und füge sie hier unter „Antwort einfügen“ ein.</li></ol>
       <div class="btnrow"><button type="button" class="btn primary" data-a="copyPrompt" data-p="photo">Anfrage kopieren</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude öffnen</a></div></div>
-    <div class="card"><h2>💡 Neue Ideen von Claude</h2>
+    <div class="card">${cardHead('bulb', 'blue', 'Neue Ideen von Claude', 'Passend zu deinem Geschmack')}
       <p class="small muted">Mahlzeit</p><div class="chips">${c('ideaMeal', !i.meal, 'Egal', 'data-m=""')}${SLOTS.map((m) => c('ideaMeal', i.meal === m, MEALS[m], `data-m="${m}"`)).join('')}${c('ideaMeal', i.meal === 'mealprep', 'Meal Prep', 'data-m="mealprep"')}</div>
       <p class="small muted">Zeit</p><div class="chips">${[[20, '≤ 20 Min'], [30, '≤ 30 Min'], [45, '≤ 45 Min'], [0, 'egal']].map(([t, l]) => c('ideaTime', i.time === t, l, `data-t="${t}"`)).join('')}</div>
       <p class="small muted">Wie viele?</p><div class="chips">${[1, 3, 5].map((n) => c('ideaCount', i.count === n, n, `data-n="${n}"`)).join('')}</div>
       <label class="field"><span>Wunsch (optional)</span><input value="${esc(i.wish)}" placeholder="z. B. mit Kichererbsen, etwas Herbstliches" data-c="ideaWish"></label>
       <div class="btnrow"><button type="button" class="btn primary" data-a="copyPrompt" data-p="idea">Anfrage kopieren</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude öffnen</a></div></div>
-    <button type="button" class="btn primary" data-a="openImport">📋 Antwort von Claude einfügen</button>
-    <button type="button" class="btn" data-a="newRecipe">✍️ Rezept selbst eintippen</button>`;
+    <div class="card list">
+      <button type="button" class="rrow" data-a="openImport">${ico('paste', 'sm')}<span class="rmain"><b>Antwort von Claude einfügen</b><span class="meta">Rezept aus Foto oder Ideen speichern</span></span><span class="chev">›</span></button>
+      <button type="button" class="rrow" data-a="newRecipe">${ico('pen', 'sm plum')}<span class="rmain"><b>Rezept selbst eintippen</b><span class="meta">Zutaten und Schritte von Hand</span></span><span class="chev">›</span></button>
+    </div>`;
 }
 
 function viewImport() {
@@ -483,15 +542,15 @@ function viewImport() {
 function viewMore() {
   const own = db.recipes.length;
   return `${header('Mehr')}
-    <div class="card"><h2>Mein Profil</h2>
+    <div class="card">${cardHead('user', '', 'Mein Profil')}
       <div class="row"><span>Standard-Portionen</span><div class="stepper"><button type="button" class="icon sm" data-a="profServ" data-d="-1">−</button><b>${db.profile.servings}</b><button type="button" class="icon sm" data-a="profServ" data-d="1">+</button></div></div>
       <label class="field"><span>Mag ich nicht / vertrage ich nicht (für Claudes Ideen)</span><textarea rows="2" data-c="avoid">${esc(db.profile.avoid)}</textarea></label></div>
-    <div class="card"><h2>Daten sichern</h2>
+    <div class="card">${cardHead('save', 'blue', 'Daten sichern')}
       <p class="small muted">Alles ist nur auf diesem iPhone gespeichert (${own} eigene ${own === 1 ? 'Rezept' : 'Rezepte'}). Sichere ab und zu eine Datei, z. B. in iCloud Drive.${db.lastBackup ? ` Letzte Sicherung: ${new Date(db.lastBackup).toLocaleDateString('de-DE')}.` : ''}</p>
       <button type="button" class="btn" data-a="exportJson">Daten sichern</button>
       <label class="btn">Sicherung laden<input type="file" accept="application/json,.json" data-c="importJson" hidden></label></div>
-    <div class="card"><h2>Als App installieren</h2><p class="small">In Safari unten auf <b>Teilen</b> tippen, dann <b>Zum Home-Bildschirm</b>. Danach funktioniert die App auch offline.</p></div>
-    <div class="card"><h2>Hinweis</h2><p class="small muted">Protein und Ballaststoffe sind grobe Schätzungen pro Portion und nur zur Orientierung gedacht.</p></div>
+    <div class="card">${cardHead('phone', 'gold', 'Als App installieren')}<p class="small">In Safari unten auf <b>Teilen</b> tippen, dann <b>Zum Home-Bildschirm</b>. Danach funktioniert die App auch offline.</p></div>
+    <div class="card">${cardHead('info', 'plum', 'Hinweis')}<p class="small muted">Protein und Ballaststoffe sind grobe Schätzungen pro Portion und nur zur Orientierung gedacht.</p></div>
     <button type="button" class="link danger" data-a="wipe">Alle Daten löschen</button>`;
 }
 
@@ -726,6 +785,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
   if (e.key === 'Enter' && e.target.id === 'extraIn') { e.preventDefault(); A.addExtra(); }
 });
+
+window.addEventListener('scroll', () => document.body.classList.toggle('scrolled', window.scrollY > 8), { passive: true });
 
 // ---------- Start ----------
 render();
