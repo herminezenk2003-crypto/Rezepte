@@ -123,11 +123,11 @@ const secOf = (i) => { const t = `${i.name} ${i.note}`.toLowerCase(); return (SE
 
 // ---------- Speicher ----------
 const KEY = 'rezepte.v1';
-const EMPTY = () => ({ v: 1, profile: { servings: 2, avoid: 'Tomaten (nur wenig), rohe Möhren' }, recipes: [], meta: {}, plan: {},
+const EMPTY = () => ({ v: 1, profile: { servings: 2, avoid: 'Tomaten (nur wenig), rohe Möhren, Paprika, Aubergine' }, noPaprika: true, recipes: [], meta: {}, plan: {},
   shop: { checked: {}, home: {}, buy: {}, extra: [], recipes: [] }, pantry: ['Salz', 'Pfeffer', 'Meersalz', 'Olivenöl'], lastBackup: null });
 let db = load();
 function load() {
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v === 1) { const x = Object.assign(EMPTY(), d); x.shop.buy = x.shop.buy || {}; return x; } } catch (e) {}
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v === 1) { const x = Object.assign(EMPTY(), d); x.shop.buy = x.shop.buy || {}; if (!d.noPaprika) { const av = x.profile.avoid || ''; if (!/paprika/i.test(av)) x.profile.avoid = (av ? av + ', ' : '') + 'Paprika, Aubergine'; x.noPaprika = true; } return x; } } catch (e) {}
   return EMPTY();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast('Speichern fehlgeschlagen'); } }
